@@ -1,29 +1,17 @@
 import React, {useState, useContext, useEffect} from 'react';
 import { AlertContext } from '../context/alert/alertContext';
 import { FirebaseContext } from '../context/firebase/firebaseContext';
+import iNote from "./interfaces/iNote";
 
 interface FormProps {
-  notes: Array<{ id: string, title: string, date: string, tags: string[] }>;
+  notes: iNote[];
   selectedNoteId: string|null;
   onUpdateSelectedNoteId: (id: string|null) => void;
-  // onSetSelectedTags: (tag: string|null) => void;
-  // tags: string[];
 }
 
 const Form: React.FC<FormProps> = ({notes, selectedNoteId, onUpdateSelectedNoteId}) => {
 
-  // const uniqueTags: { [key: string]: boolean } = {};
-  // for (const note of notes) {
-  //   for (const tag of note.tags) {
-  //     uniqueTags[tag] = true;
-  //   }
-  // }
-
-  // tags = Object.keys(uniqueTags);
-  // @ts-ignore
-  // onSetSelectedTags(tags);
-  // console.log(notes);
-  // setTags(tg);
+  const [tags, setTags] = useState<string[]>([]);
 
   useEffect(()=>{
     if(selectedNoteId){
@@ -34,6 +22,24 @@ const Form: React.FC<FormProps> = ({notes, selectedNoteId, onUpdateSelectedNoteI
       });
     }
   },[selectedNoteId]);
+
+  useEffect(()=>{
+    const uniqueTags: { [key: string]: boolean } = {};
+    if(notes){
+
+      notes.forEach((note) => {
+        if(note.tags){
+          note.tags.forEach((tag) => {
+            uniqueTags[tag] = true;
+          })
+        }
+      });
+
+      const allTags = Object.keys(uniqueTags);
+      setTags(allTags);
+    }
+
+  }, [notes])
 
   const [value, setValue] = useState('');
   const alert = useContext(AlertContext);
@@ -50,7 +56,6 @@ const Form: React.FC<FormProps> = ({notes, selectedNoteId, onUpdateSelectedNoteI
         else{
           await firebase.addNote(value.trim());
         }
-
         onUpdateSelectedNoteId(null);
         //@ts-ignore
         alert.show('Заметка была создана', 'success');
@@ -61,7 +66,7 @@ const Form: React.FC<FormProps> = ({notes, selectedNoteId, onUpdateSelectedNoteI
       setValue('');
     } else {
       //@ts-ignore
-      alert.show('Введите название заметки');
+      alert.show('Введите заметку');
     }
   };
 
@@ -82,12 +87,6 @@ const Form: React.FC<FormProps> = ({notes, selectedNoteId, onUpdateSelectedNoteI
           </div>
         </div>
       </form>
-      {/*<select className="form-select me-2" aria-label="Выберите тег" onChange={(e) => onSetSelectedTags(e.target.value)}>*/}
-      {/*  <option value="">Все теги</option>*/}
-      {/*  {tags?.map((tag, index) => (*/}
-      {/*    <option key={index} value={tag}>{tag}</option>*/}
-      {/*  ))}*/}
-      {/*</select>*/}
     </>
   );
 };

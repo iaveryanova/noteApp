@@ -8,7 +8,7 @@ interface FirebaseStateProps {
   children: React.ReactNode
 }
 
-const url = "https://notes-2217f-default-rtdb.firebaseio.com";
+const url = process.env.REACT_APP_DB_URL;
 
 export const FirebaseState: React.FC<FirebaseStateProps> = ({ children }) => {
   const initialState = {
