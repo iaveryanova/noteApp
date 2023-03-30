@@ -2,13 +2,13 @@ import React, { useReducer } from "react";
 import axios from "axios";
 import { FirebaseContext } from "./firebaseContext";
 import { firebaseReducer } from "./firebaseReducer";
-import { SHOW_LOADER, REMOVE_NOTE, ADD_NOTE, FETCH_NOTES } from "../types";
+import { SHOW_LOADER, REMOVE_NOTE, ADD_NOTE, FETCH_NOTES, UPDATE_NOTE } from "../types";
 
 interface FirebaseStateProps {
   children: React.ReactNode
 }
 
-const url = process.env.REACT_APP_DB_URL;
+const url = "https://notes-2217f-default-rtdb.firebaseio.com";
 
 export const FirebaseState: React.FC<FirebaseStateProps> = ({ children }) => {
   const initialState = {
@@ -32,9 +32,17 @@ export const FirebaseState: React.FC<FirebaseStateProps> = ({ children }) => {
 
   const addNote = async (title: string) => {
 
-    console.log('addnote');
+    const tagRegex = /#(\w+)/g;
+    const text = title;
+    const tags: string[] = [];
+    let match;
+    while ((match = tagRegex.exec(text)) !== null) {
+      tags.push(match[1]);
+    }
+
     const note = {
       title,
+      tags,
       date: new Date().toJSON(),
     };
     try {
@@ -50,6 +58,34 @@ export const FirebaseState: React.FC<FirebaseStateProps> = ({ children }) => {
     }
 
   };
+
+  const updateNote = async (id: string, title: string) => {
+    const tagRegex = /#(\w+)/g;
+    const text = title;
+    const tags: string[] = [];
+    let match;
+    while ((match = tagRegex.exec(text)) !== null) {
+      tags.push(match[1]);
+    }
+
+    const note = {
+      title,
+      tags,
+      date: new Date().toJSON(),
+    };
+
+    try {
+      await axios.put(`${url}/notes/${id}.json`, note);
+      const payload = {
+        ...note,
+        id,
+      };
+      dispatch({ type: UPDATE_NOTE, payload });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
 
   const removeNote = async (id: string) => {
     try {
@@ -69,6 +105,7 @@ export const FirebaseState: React.FC<FirebaseStateProps> = ({ children }) => {
         showLoader,
         fetchNotes,
         addNote,
+        updateNote,
         removeNote,
         loading:state.loading,
         notes: state.notes,

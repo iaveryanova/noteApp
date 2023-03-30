@@ -1,4 +1,4 @@
-import { SHOW_LOADER, ADD_NOTE, FETCH_NOTES, REMOVE_NOTE  } from "../types"
+import { SHOW_LOADER, ADD_NOTE, FETCH_NOTES, REMOVE_NOTE, UPDATE_NOTE  } from "../types"
 
 interface FirebaseState {
     notes: any[],
@@ -16,7 +16,11 @@ const handlers: {[key: string]: (state: FirebaseState, action: any) => FirebaseS
     [REMOVE_NOTE]: (state, {payload}) => ({
         ...state, 
         notes: state.notes.filter(note => note.id !== payload)
-    }), 
+    }),
+    [UPDATE_NOTE]: (state, {payload}) => ({
+        ...state,
+        notes: state.notes.map(note => note.id === payload.id ? payload : note)
+    }),
     DEFAULT: state => state
 }
 
